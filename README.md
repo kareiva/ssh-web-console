@@ -28,7 +28,7 @@ Open your browser, visit `http://localhost:2222`. Enjoy it!
 
 ## Build & Run
 
-Make sure your Go version is 1.11 or later
+Make sure your Go version is 1.27 or later
 
 ### Clone
 
@@ -51,7 +51,7 @@ cd ../
 ```bash
 go get github.com/rakyll/statik
 statik --src=web/build  # use statik tool to convert files in 'web/build' dir to go code, and compile into binary.
-export GO111MODULE=on # for go 1.11.x
+export GOTOOLCHAIN=auto # lets an older local Go download Go 1.27 automatically
 go build
 ```
 
