@@ -3,7 +3,7 @@ module github.com/genshen/ssh-web-console
 go 1.27
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/pkg/sftp v1.13.12
 	github.com/rakyll/statik v0.1.8
