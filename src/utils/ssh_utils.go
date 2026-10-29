@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
-	"log"
 	"net"
 	"strconv"
 )
@@ -96,8 +95,7 @@ func (s *SSHShellSession) Config(cols, rows uint32) (*ssh.Session, error) {
 	// but, as for reading data from ssh server, we can set Session.Stdout and Session.Stderr
 	// to receive data from ssh server, and write back to somewhere.
 	if stdin, err := session.StdinPipe(); err != nil {
-		log.Fatal("failed to set IO stdin: ", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to set IO stdin: %w", err)
 	} else {
 		// in fact, stdin it is channel.
 		s.StdinPipe = stdin
@@ -117,13 +115,11 @@ func (s *SSHShellSession) Config(cols, rows uint32) (*ssh.Session, error) {
 	}
 	// Request pseudo terminal
 	if err := session.RequestPty("xterm", int(rows), int(cols), modes); err != nil {
-		log.Fatal("request for pseudo terminal failed: ", err)
-		return nil, err
+		return nil, fmt.Errorf("request for pseudo terminal failed: %w", err)
 	}
 	// Start remote shell
 	if err := session.Shell(); err != nil {
-		log.Fatal("failed to start shell: ", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to start shell: %w", err)
 	}
 	return session, nil
 }
