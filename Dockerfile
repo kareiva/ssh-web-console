@@ -1,40 +1,40 @@
-# build method: just run `docker build --rm --build-arg -t genshen/ssh-web-console .`
+# build method: just run `docker build --rm -t ssh-web-console .`
 
 # build frontend code
-FROM node:14.15.4-alpine3.12 AS frontend-builder
+FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend-builder
 
 COPY web web-console/
 
 RUN cd web-console \
-    && yarn install \
+    && yarn install --frozen-lockfile \
     && yarn build
 
 
-FROM golang:1.15.7-alpine3.13 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
 
-# set to 'on' if using go module
-ARG STATIC_DIR=build
+ARG TARGETOS
+ARG TARGETARCH
 
+WORKDIR /src
 
-RUN apk add --no-cache git \
-    && go get -u github.com/rakyll/statik
+COPY go.mod go.sum ./
+RUN go mod download \
+    && go install github.com/rakyll/statik@v0.1.8
 
-COPY ./  /go/src/github.com/genshen/ssh-web-console/
-COPY --from=frontend-builder web-console/build /go/src/github.com/genshen/ssh-web-console/${STATIC_DIR}/
+COPY ./ ./
+COPY --from=frontend-builder web-console/build ./web/build/
 
-RUN cd ./src/github.com/genshen/ssh-web-console/ \
-    && statik -src=${STATIC_DIR} \
-    && go build \
-    && go install
+RUN statik -src=web/build \
+    && CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/ssh-web-console .
 
 ## copy binary
-FROM alpine:3.13
+FROM alpine:3.22
 
 ARG HOME="/home/web"
 
 RUN adduser -D web -h ${HOME}
 
-COPY --from=builder --chown=web /go/bin/ssh-web-console ${HOME}/ssh-web-console
+COPY --from=builder --chown=web /out/ssh-web-console ${HOME}/ssh-web-console
 
 WORKDIR ${HOME}
 USER web
