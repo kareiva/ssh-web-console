@@ -44,6 +44,7 @@ jobs:
 
   container:
     name: Alpine Linux container image
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -64,6 +65,24 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build amd64 image for smoke test
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          build-args: VERSION=${{ github.ref_name }}
+          load: true
+          tags: ssh-web-console:smoke-test
+          cache-from: type=gha
+
+      - name: Smoke test
+        run: |
+          docker run --rm ssh-web-console:smoke-test ./ssh-web-console -version
+          docker run -d --name swc -p 2222:2222 -v "$PWD/conf:/home/web/conf:ro" ssh-web-console:smoke-test
+          for i in $(seq 1 10); do curl -fsS http://127.0.0.1:2222/ -o page.html && break; sleep 1; done
+          grep '<title>SSH Web Console</title>' page.html || { docker logs swc; exit 1; }
+          docker rm -f swc
 
       - name: Image metadata
         id: meta
