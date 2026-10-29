@@ -14,6 +14,7 @@ FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
+ARG VERSION=dev
 
 WORKDIR /src
 
@@ -25,7 +26,7 @@ COPY ./ ./
 COPY --from=frontend-builder web-console/build ./web/build/
 
 RUN statik -src=web/build \
-    && CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/ssh-web-console .
+    && CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags "-X main.buildVersion=${VERSION}" -o /out/ssh-web-console .
 
 ## copy binary
 FROM alpine:3.22

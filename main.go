@@ -11,6 +11,7 @@ import (
 
 var confFilePath string
 var version bool
+var buildVersion = "dev"
 
 func init() {
 	flag.StringVar(&confFilePath, "config", "conf/config.yaml", "filepath of config file.")
@@ -20,7 +21,7 @@ func init() {
 func main() {
 	flag.Parse()
 	if version {
-		fmt.Println("v0.4.0")
+		fmt.Println(buildVersion)
 		return
 	}
 	if err := utils.InitConfig(confFilePath); err != nil {
