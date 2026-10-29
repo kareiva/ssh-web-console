@@ -3,7 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
 
@@ -15,20 +15,20 @@ type JwtConnection struct {
 
 type Claims struct {
 	JwtConnection
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 // create a jwt token,and return this token as string type.
 // we can create a new token with Claims in it if login is successful.
 // then, we can known the host and port when setting up websocket or sftp.
 func JwtNewToken(connection JwtConnection, issuer string) (tokenString string, expire int64, err error) {
-	expireToken := time.Now().Add(time.Second * time.Duration(Config.Jwt.TokenLifetime)).Unix()
+	expireToken := time.Now().Add(time.Second * time.Duration(Config.Jwt.TokenLifetime))
 
 	// We'll manually assign the claims but in production you'd insert values from a database
 	claims := Claims{
 		JwtConnection: connection,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expireToken,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expireToken),
 			Issuer:    issuer,
 		},
 	}
@@ -38,7 +38,7 @@ func JwtNewToken(connection JwtConnection, issuer string) (tokenString string, e
 	if signedToken, err := token.SignedString([]byte(Config.Jwt.Secret)); err != nil {
 		return "", 0, err
 	} else {
-		return signedToken, expireToken, nil
+		return signedToken, expireToken.Unix(), nil
 	}
 }
 
