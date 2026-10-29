@@ -1,0 +1,6 @@
+.git
+web/.git
+web/node_modules
+web/build
+statik
+ssh-web-console-*
