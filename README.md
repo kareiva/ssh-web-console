@@ -1,25 +1,27 @@
 # ssh-web-console
 
-you can connect to your linux machine by ssh in your browser.
+you can connect to your unix machine by ssh in your browser.
 
-![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/genshen/ssh-web-console?logo=docker&sort=date)
-![Docker Image Version (latest semver)](https://img.shields.io/docker/v/genshen/ssh-web-console?sort=semver&logo=docker)
-![Docker Pulls](https://img.shields.io/docker/pulls/genshen/ssh-web-console?logo=docker)
+![Build](https://github.com/kareiva/ssh-web-console/actions/workflows/build-and-release.yml/badge.svg)
+![Latest release](https://img.shields.io/github/v/release/kareiva/ssh-web-console?sort=semver)
+![Go version](https://img.shields.io/github/go-mod/go-version/kareiva/ssh-web-console)
 
 ## Quick start
 
 ```bash
-$ docker pull genshen/ssh-web-console:latest
-# docker build --build-arg GOMODULE=on -t genshen/ssh-web-console . # or build docker image on your own machine
-$ docker run -v ${PWD}/conf:/home/web/conf -p 2222:2222 --rm genshen/ssh-web-console
+$ docker pull ghcr.io/kareiva/ssh-web-console:latest  # FreeBSD image: ghcr.io/kareiva/ssh-web-console:freebsd
+# docker build -t ghcr.io/kareiva/ssh-web-console . # or build docker image on your own machine (from a clone with submodules)
+$ docker run -v ${PWD}/conf:/home/web/conf -p 2222:2222 --rm ghcr.io/kareiva/ssh-web-console
 ```
+
+Prebuilt binaries for Linux, FreeBSD (amd64/arm64), macOS and Windows (amd64) are on the [Releases](https://github.com/kareiva/ssh-web-console/releases) page.
 
 or using Docker Compose:
 
 ```bash
-$ git clone https://github.com/genshen/ssh-web-console.git
+$ git clone https://github.com/kareiva/ssh-web-console.git
 $ cd ssh-web-console
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 Open your browser, visit `http://localhost:2222`. Enjoy it!
@@ -28,12 +30,12 @@ Open your browser, visit `http://localhost:2222`. Enjoy it!
 
 ## Build & Run
 
-Make sure your Go version is 1.27 or later
+Make sure your Go version is 1.27 or later, and that Node.js 22 and Yarn 1 are installed for the frontend
 
 ### Clone
 
 ```bash
-git clone --recurse-submodules https://github.com/genshen/ssh-web-console.git
+git clone --recurse-submodules https://github.com/kareiva/ssh-web-console.git
 cd ssh-web-console
 ```
 
@@ -49,15 +51,13 @@ cd ../
 ### Build go
 
 ```bash
-go get github.com/rakyll/statik
-statik --src=web/build  # use statik tool to convert files in 'web/build' dir to go code, and compile into binary.
 export GOTOOLCHAIN=auto # lets an older local Go download Go 1.27 automatically
-go build
+go build                # embeds 'web/build' into the binary; or run 'make' to cross-compile all release binaries
 ```
 
 ## Run
 
-run: `./ssh-web-console`, and than you can enjoy it in your browser by visiting `http://localhost:2222`.
+run: `./ssh-web-console` (reads `conf/config.yaml`; use `-config <path>` to change it, `-version` to print the version), and then you can enjoy it in your browser by visiting `http://localhost:2222`.
 
 ## Screenshots
 
