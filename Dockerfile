@@ -19,14 +19,12 @@ ARG VERSION=dev
 WORKDIR /src
 
 COPY go.mod go.sum ./
-RUN go mod download \
-    && go install github.com/rakyll/statik@v0.1.8
+RUN go mod download
 
 COPY ./ ./
 COPY --from=frontend-builder web-console/build ./web/build/
 
-RUN statik -src=web/build \
-    && CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags "-X main.buildVersion=${VERSION}" -o /out/ssh-web-console .
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags "-X main.buildVersion=${VERSION}" -o /out/ssh-web-console .
 
 ## copy binary
 FROM alpine:3.22

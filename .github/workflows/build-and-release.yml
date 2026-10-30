@@ -30,10 +30,7 @@ jobs:
         run: cd web && yarn && yarn build && cd ../
 
       - name: Get Go dependencies
-        run: go mod download && go install github.com/rakyll/statik@v0.1.8
-
-      - name: Static->GO generation
-        run: statik --src=web/build
+        run: go mod download
 
       - name: Build
         run: make VERSION=${{ github.ref_name }}

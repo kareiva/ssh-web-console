@@ -1,13 +1,18 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
 	"github.com/genshen/ssh-web-console/src/routers"
 	"github.com/genshen/ssh-web-console/src/utils"
+	"io/fs"
 	"log"
 	"net/http"
 )
+
+//go:embed all:web/build
+var webBuild embed.FS
 
 var confFilePath string
 var version bool
@@ -28,7 +33,11 @@ func main() {
 		log.Fatal("config error,", err)
 		return
 	}
-	routers.Register()
+	static, err := fs.Sub(webBuild, "web/build")
+	if err != nil {
+		log.Fatal(err)
+	}
+	routers.Register(static)
 	log.Println("listening on port ", utils.Config.Site.ListenAddr)
 	// listen http
 	if err := http.ListenAndServe(utils.Config.Site.ListenAddr, nil); err != nil {
