@@ -34,7 +34,9 @@ func (e SftpEstablish) ServeAfterAuthenticated(w http.ResponseWriter, r *http.Re
 
 	// add sftp client to list if success.
 	user := session.Value.(models.UserInfo)
-	sftpEntity, err := utils.NewSftpEntity(utils.SftpNode(utils.NewSSHNode(user.Host, user.Port)), user.Username, ssh.Password(user.Password))
+	node := utils.NewSSHNode(user.Host, user.Port)
+	node.HostKeyCallback = utils.PinnedHostKey(user.HostKey)
+	sftpEntity, err := utils.NewSftpEntity(utils.SftpNode(node), user.Username, ssh.Password(user.Password))
 	if err != nil {
 		http.Error(w, "Error while establishing sftp connection", 400)
 		log.Println("Error: while establishing sftp connection", err)

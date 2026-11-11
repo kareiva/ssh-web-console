@@ -33,7 +33,8 @@ var Config struct {
 		ViewsDir string `yaml:"views_dir"` // todo
 	} `yaml:"dev"`
 	SSH struct {
-		BufferCheckerCycleTime int `yaml:"buffer_checker_cycle_time"`
+		BufferCheckerCycleTime int    `yaml:"buffer_checker_cycle_time"`
+		KnownHosts             string `yaml:"known_hosts"`
 	} `yaml:"ssh"`
 	Jwt struct {
 		Secret        string `yaml:"jwt_secret"`
