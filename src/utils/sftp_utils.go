@@ -38,7 +38,7 @@ var (
 
 func NewSftpEntity(user SftpNode, username string, auth ssh.AuthMethod) (SftpEntity, error) {
 	sshEntity := SSHShellSession{
-		Node: NewSSHNode(user.Host, user.Port),
+		Node: Node(user),
 	}
 	// init ssh connection.
 	err := sshEntity.Connect(username, auth)

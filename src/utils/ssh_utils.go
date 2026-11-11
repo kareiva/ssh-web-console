@@ -27,6 +27,8 @@ type Node struct {
 	Host   string // host, e.g: ssh.example.com
 	Port   int    //port,default value is 22
 	client *ssh.Client
+	// HostKeyCallback verifies the remote host key; Connect fails if it is nil.
+	HostKeyCallback ssh.HostKeyCallback
 }
 
 func NewSSHNode(host string, port int) Node {
@@ -55,10 +57,7 @@ func (node *Node) Connect(username string, auth ssh.AuthMethod) error {
 		Auth: []ssh.AuthMethod{
 			auth,
 		},
-		//HostKeyCallback: ssh.FixedHostKey(hostKey),
-		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			return nil
-		},
+		HostKeyCallback: node.HostKeyCallback,
 	}
 
 	client, err := ssh.Dial("tcp", net.JoinHostPort(node.Host, strconv.Itoa(node.Port)), config)

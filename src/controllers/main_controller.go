@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/genshen/ssh-web-console/src/models"
 	"github.com/genshen/ssh-web-console/src/utils"
 	"golang.org/x/crypto/ssh"
@@ -33,8 +34,16 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 			//try to login session account
 			session := utils.SSHShellSession{}
 			session.Node = utils.NewSSHNode(userinfo.Host, userinfo.Port)
+			var hostKey ssh.PublicKey
+			session.HostKeyCallback = utils.VerifyHostKey(r.Form.Get("hostkey"), &hostKey)
 			err := session.Connect(userinfo.Username, ssh.Password(userinfo.Password))
-			if err != nil {
+			var hostKeyErr *utils.HostKeyError
+			if errors.As(err, &hostKeyErr) {
+				errUnmarshal = models.JsonResponse{HasError: true, Message: models.SIGN_IN_FORM_TYPE_ERROR_HOST_KEY_UNKNOWN, Addition: hostKeyErr}
+				if hostKeyErr.Changed {
+					errUnmarshal.Message = models.SIGN_IN_FORM_TYPE_ERROR_HOST_KEY_CHANGED
+				}
+			} else if err != nil {
 				errUnmarshal = models.JsonResponse{HasError: true, Message: models.SIGN_IN_FORM_TYPE_ERROR_PASSWORD}
 			} else {
 				defer session.Close()
@@ -44,6 +53,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 					// bad connection.
 					return
 				}
+				userinfo.HostKey = hostKey.Marshal()
 				if session, err := client.NewSession(); err == nil {
 					if err := session.Run("whoami"); err == nil {
 						if token, expireUnix, err := utils.JwtNewToken(userinfo.JwtConnection, utils.Config.Jwt.Issuer); err == nil {
